@@ -16,6 +16,7 @@ const bodyParser = require("body-parser");
 const errorHandler = require("errorhandler");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const chalk = require("chalk").default;
 
 function _bootstrapApp() {
   // Create Express server
@@ -54,7 +55,10 @@ module.exports = () => {
         useNewUrlParser: true,
         useUnifiedTopology: true
       })
-      .then(_ => resolve(_bootstrapApp()))
+      .then(_ => {
+        console.log(`[info]: ${chalk.green("Databse connected!")}`);
+        resolve(_bootstrapApp());
+      })
       .catch(error => {
         reject(error);
         /* kill the server if we can't connect */
