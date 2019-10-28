@@ -11,7 +11,6 @@ const regValidation = [
     check("name", "name is required!").isString(),
     check("email", "email is required!").isEmail(),
     check("phoneNumber", "phone number is required!").isMobilePhone("en-NG"),
-    check("ageRange", "Please specify your age range!").isString(),
     check("gender", "are you male or female!").isString(),
     check("vendor", "pls supply your vendor!").isString(),
     check("password", "please specify a password")
@@ -44,12 +43,11 @@ router.post("/register", regValidation, async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     req.body.password = await bcrypt.hash(pword, salt);
 
-    const { name, phoneNumber, ageRange, gender, password, email, vendor } = req.body;
+    const { name, phoneNumber, gender, password, email, vendor } = req.body;
     const newAdmin = await Admin({
         id: shortid.generate(),
         name,
         phoneNumber,
-        ageRange,
         gender,
         password,
         vendor,

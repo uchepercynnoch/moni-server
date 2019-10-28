@@ -1,12 +1,13 @@
 {
-  "name": "server",
+  "name": "moni-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "The moni server",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "dev": "node src/app.js",
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
     "watch": "nodemon src/app.js",
     "test": "jest --forceExit --coverage --verbose",
     "watch-test": "npm run test -- --watchAll",
