@@ -7,7 +7,6 @@
   },
   "scripts": {
     "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
     "watch": "nodemon src/app.js",
     "test": "jest --forceExit --coverage --verbose",
     "watch-test": "npm run test -- --watchAll",
