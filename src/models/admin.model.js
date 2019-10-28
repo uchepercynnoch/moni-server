@@ -8,7 +8,6 @@ const AdminSchema = new Schema({
     email: { type: String, required: true },
     password: { type: String, required: true },
     phoneNumber: { type: String, required: true },
-    ageRange: { type: String, required: true },
     gender: { type: String, enum: ["male", "female"] },
     vendor: {type: Schema.Types.ObjectId, ref: "Vendor" },
     type: {type: String, enum: ["admin","super-admin"], default: "admin"},
