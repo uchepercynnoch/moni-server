@@ -1,0 +1,64 @@
+const express = require("express");
+const dotenv = require("dotenv");
+dotenv.config();
+const morgan = require("morgan")("tiny");
+const UserAccountController = require("./controllers/useraccount.controller");
+const VendorController = require("./controllers/vendor.controller");
+const MerchantController = require("./controllers/merchant.controller");
+const PointsController = require("./controllers/points.controller");
+const AdminController = require("./controllers/admin.controller");
+const ProductController = require("./controllers/product.controller");
+const TransactionController = require("./controllers/transaction.controller");
+const OfferController = require("./controllers/offer.controller");
+const NewsController = require("./controllers/news.controller");
+const AnalyticsController = require("./controllers/analytics.controller");
+const bodyParser = require("body-parser");
+const errorHandler = require("errorhandler");
+const mongoose = require("mongoose");
+const cors = require("cors");
+
+/**
+ * Error Handler. Provides full stack - remove for production
+ */
+
+//"mongodb://localhost:27017/moni"
+
+mongoose
+    .connect("mongodb://localhost:27017/moni", {
+        useFindAndModify: false,
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    })
+    .then(_ => console.log("database connected!"))
+    .catch(error => console.log(`DB-ERROR: ${error}`));
+
+// Create Express server
+const app = express();
+
+// Initializing Middlewares
+app.use(errorHandler());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(morgan);
+app.use(cors());
+app.use("/uploads", express.static("uploads"));
+
+app.use("/api/user", UserAccountController);
+app.use("/api/vendor", VendorController);
+app.use("/api/merchant", MerchantController);
+app.use("/api/points", PointsController);
+app.use("/api/admin", AdminController);
+app.use("/api/product", ProductController);
+app.use("/api/transaction", TransactionController);
+app.use("/api/offer", OfferController);
+app.use("/api/news", NewsController);
+app.use("/api/analytics", AnalyticsController);
+
+/**
+ * Start Express server.
+ */
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+    console.log(`App is running at http://localhost:${PORT} in ${process.env.NODE_ENV} mode`);
+});
