@@ -34,11 +34,14 @@ router.post("/gain", Validation, async (req, res) => {
         const transaction = result;
         await gainAction(vendor, userAccount, merchant, transaction);
 
-        const saved1 = await userAccount.save();
-        const saved2 = await merchant.save();
-        // Update both ends here! probably socket io
-
-        if (saved1 && saved2) return res.send({ saved1, saved2 });
+        try {
+            const saved = await Promise.all([userAccount.save(),await merchant.save()])
+            // Update both ends here! probably socket io
+            if (saved) return res.send(userAccount);
+        }
+        catch(error) {
+            res.status(500).send({error: Object.toString(error)})
+        }
     });
 });
 
@@ -73,6 +76,7 @@ function Transform(data) {
     });
     return obj;
 }
+
 async function gainAction(vendor, userAccount, merchant, transactionDetails) {
     let pointsGained = 0;
 
@@ -83,7 +87,7 @@ async function gainAction(vendor, userAccount, merchant, transactionDetails) {
 
     const transactionRecord = new TransactionRecord({
         transactionId: shortid.generate(),
-        dateOfTransaction: Date.now(),
+        dateOfTransaction: moment().format("LLLL"),
         items: [],
         servicedBy: merchant._id,
         type: "gain",
@@ -160,10 +164,7 @@ function MembershipLevelCheck(useraccount) {
     }
 }
 
-function calculatePoints(percentage, amount) {
-    const points = Math.ceil((percentage / 100) * amount);
-    return points;
-}
+const calculatePoints = (percentage, amount) =>  Math.ceil((percentage / 100) * amount);
 
 function createConnection(config, transactionId, dataGotten) {
     try {

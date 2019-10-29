@@ -57,7 +57,7 @@ router.post("/register", validation, async (req, res) => {
             .then(async otp => {
                 console.log("message sent!");
 
-                // otp object should be expanded to have expiry stamp
+                // Todo: otp object should be expanded to have expiry stamp
                 const result = await TempUserOtpStore({
                     userId: newAccount.id,
                     otpCode: otp
