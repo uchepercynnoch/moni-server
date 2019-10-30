@@ -147,6 +147,9 @@ router.post("/add", NewTransactionValidator, async (req, res) => {
   vendor.revenue = toDinero(vendor.revenue)
     .add(payable)
     .toObject();
+  vendor.revenue = toDinero(vendor.total)
+    .add(total)
+    .toObject();
 
   // Create a transaction record to represent the transaction
   const transactionRecord = new TransactionRecord({
