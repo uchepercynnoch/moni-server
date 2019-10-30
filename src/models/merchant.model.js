@@ -15,10 +15,6 @@ const merchantSchema = new Schema({
     deviceId: { type: String },
     createdAt: { type: Date, default: Date.now },
     lastLogon: { type: Date },
-    // cashier analytics
-    customersAttendedTo: { type: Number, default: 0 },
-    totalGemsGainedForCustomers: { type: Number, default: 0 },
-    totalGemsRedeemedForCustomers: {type: Number, default: 0}
 });
 
 const Merchant = mongoose.model("Merchant", merchantSchema);

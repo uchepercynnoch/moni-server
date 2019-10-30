@@ -5,7 +5,7 @@ const twilio = require("twilio");
 const TempUserOtpStore = require("../models/tempuserotpstore.model");
 const _ = require("lodash");
 const shortid = require("shortid");
-const Helper = require("../util/helper");
+const Helper = require("../helpers/helper");
 const jwt = require("jsonwebtoken");
 const { check, validationResult } = require("express-validator");
 const mongoose = require("mongoose");
@@ -57,7 +57,7 @@ router.post("/register", validation, async (req, res) => {
             .then(async otp => {
                 console.log("message sent!");
 
-                // otp object should be expanded to have expiry stamp
+                // Todo: otp object should be expanded to have expiry stamp
                 const result = await TempUserOtpStore({
                     userId: newAccount.id,
                     otpCode: otp
