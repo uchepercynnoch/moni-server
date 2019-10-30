@@ -106,6 +106,10 @@ router.post("/add", NewTransactionValidator, async (req, res) => {
   user.decrementGems(gemsToDeduct)
   user.incrementGems(gemsToAward);
 
+  /* Update overall payables for vendor */
+  vendor.payable = toDinero(vendor.payable).add(amountToPay).toObject();
+  vendor.revenue = toDinero(vendor.revenue).add(payable).toObject()
+
   // Create a transaction record to represent the transaction
   const transactionRecord = new TransactionRecord({
     transactionId: shortid.generate(),
@@ -133,7 +137,7 @@ router.post("/add", NewTransactionValidator, async (req, res) => {
   console.log(`deducted: ${gemsToDeduct} gems`);
 
   try {
-    await Promise.all([user.save(), merchant.save(), transactionRecord.save()]);
+    await Promise.all([user.save(), vendor.save(), merchant.save(), transactionRecord.save()]);
     return res.send(
       _.pick(transactionRecord, [
         "payable",

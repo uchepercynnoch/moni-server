@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { DineroSchema, toDinero } = require("../helpers/dinero-helper");
 
 const Schema = mongoose.Schema;
 
@@ -14,10 +15,9 @@ const VendorSchema = new Schema({
   vendorName: { type: String, required: true },
   location: { type: String, required: true },
   iamAlias: { type: String, required: true },
-  imageId: { type: String },
-  /* It's actually a dinero object in json format, we can't use Number here */
-  payable: { type: String },
-  revenue: { type: String },
+  // imageId: { type: String },
+  payable: { type: DineroSchema, default: toDinero(0).toObject() },
+  revenue: { type: DineroSchema, default: toDinero(0).toObject() },
   config: { type: configSchema, default: configSchema },
   loyaltyPercentage: { type: Number, default: 1 }
 });

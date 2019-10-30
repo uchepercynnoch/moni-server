@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const moment = require("moment");
 const { DineroSchema, toDinero } = require("../helpers/dinero-helper");
 
 const Schema = mongoose.Schema;
