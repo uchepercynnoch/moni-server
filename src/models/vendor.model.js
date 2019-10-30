@@ -11,15 +11,15 @@ const configSchema = Schema({
 });
 
 const VendorSchema = new Schema({
-  id: { type: String, required: true },
-  vendorName: { type: String, required: true },
-  location: { type: String, required: true },
-  iamAlias: { type: String, required: true },
-  // imageId: { type: String },
-  payable: { type: DineroSchema, default: toDinero(0).toObject() },
-  revenue: { type: DineroSchema, default: toDinero(0).toObject() },
-  config: { type: configSchema, default: configSchema },
-  loyaltyPercentage: { type: Number, default: 1 }
+    id: { type: String, required: true },
+    vendorName: { type: String, required: true },
+    location: { type: String, required: true },
+    iamAlias: { type: String, required: true },
+    // imageId: { type: String },
+    payable: { type: DineroSchema, default: toDinero(0).toObject() },
+    revenue: { type: DineroSchema, default: toDinero(0).toObject() },
+    config: { type: configSchema, default: configSchema },
+    loyaltyPercentage: { type: Number, default: 1 }
 });
 
 const Vendor = mongoose.model("Vendor", VendorSchema);
