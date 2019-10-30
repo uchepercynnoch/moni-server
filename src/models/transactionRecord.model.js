@@ -1,19 +1,30 @@
 const mongoose = require("mongoose");
+const { DineroSchema } = require("../helpers/dinero-helper");
 
 const Schema = mongoose.Schema;
 
-const TransactionRecordSchema = new Schema({
-    transactionId: { type: String, required: true },
-    dateOfTransaction: { type: Date, required: true },
-    items: [{ type: Schema.Types.ObjectId, ref: "product" }],
-    servicedBy: { type: Schema.Types.ObjectId, ref: "Merchant" }, // merchant
-    type: { type: String, enum: ["gain", "redeem"] },
-    deductedPoints: { type: Number },
-    gainedPoints: { type: Number },
-    citizen: { type: Schema.Types.ObjectId, ref: "useraccount" },
-    vendor: { type: Schema.Types.ObjectId, ref: "Vendor" }
+const DiscountSchema = new Schema({
+  gems: { type: DineroSchema, required: true },
+  membership: { type: DineroSchema, required: true },
 });
 
-const TransactionRecord = mongoose.model("TransactionRecord", TransactionRecordSchema);
+const TransactionRecordSchema = new Schema({
+  transactionId: { type: String, required: true },
+  date: { type: Date, default: Date.now() },
+  items: [{ type: String }],
+  servicedBy: { type: Schema.Types.ObjectId, ref: "Merchant", required: true },
+  gemsDeducted: { type: Number, required: true },
+  gemsAwarded: { type: Number, required: true },
+  total: { type: DineroSchema },
+  discount: { type: DiscountSchema, required: true },
+  user: { type: Schema.Types.ObjectId, ref: "useraccount", required: true },
+  vendor: { type: Schema.Types.ObjectId, ref: "Vendor", required: true },
+  payable: { type: DineroSchema, required: true }
+});
+
+const TransactionRecord = mongoose.model(
+  "TransactionRecord",
+  TransactionRecordSchema
+);
 
 module.exports = TransactionRecord;

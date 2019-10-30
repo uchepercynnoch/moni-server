@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const Vendor = require("../models/vendor.model");
 const shortid = require("shortid");
-const { uploadDestination } = require("../util/helper");
+const { uploadDestination } = require("../helpers/helper");
 
 //TODO: Add image uploading with multer
 
