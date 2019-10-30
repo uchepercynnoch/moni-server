@@ -219,7 +219,14 @@ router.get("/", async (req, res) => {
     if (!req.query.userId) return res.status(400).send({ error: "Invalid userId" });
 
     UserAccount.findOne({ id: req.query.userId })
-        .populate("transactions")
+        .populate({
+            path: "transactions",
+            select: "items servicedBy transactionId type gainedPoints deductedPoints",
+            populate: {
+                path: "items servicedBy",
+                select: "name iam"
+            }
+        })
         .select({
             name: 1,
             _id: 0,

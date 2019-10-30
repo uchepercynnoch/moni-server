@@ -16,16 +16,6 @@ const VendorSchema = new Schema({
     iamAlias: { type: String, required: true },
     transactions: [{ type: Schema.Types.ObjectId, ref: "TransactionRecord" }],
     imageId: { type: String },
-    loyaltyType: {
-        type: String,
-        enum: ["frequency", "attached-discount", "amount-spent"],
-        default: "amount-spent"
-    },
-
-    // frequency count for different membershipTypes
-    _blueFrequencyCount: { type: Number, default: 0 },
-    _goldFrequencyCount: { type: Number, default: 0 },
-    _platinumFrequencyCount: { type: Number, default: 0 },
 
     config: { type: configSchema, default: configSchema },
 

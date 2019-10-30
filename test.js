@@ -1,8 +1,9 @@
 const shortid = require("shortid");
 const moment = require("moment");
 
-const date = Date.now();
-console.log(moment().format('LLLL'));
+const date = new Date(2019,9,29);
+console.log(date);
+console.log(moment(date).format("YYYYMMDD"));
 
 // const a = {
 //     ref: "1572180900993-1-7493",
