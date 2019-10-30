@@ -26,37 +26,20 @@ const NewTransactionValidator = [
 /* Note: currenlty assumes a 1 GEM -> 1 NGA conversion ratio */
 const convertGemsToCash = gemValue => toDinero(gemValue, true);
 
-router.post("/add", NewTransactionValidator, async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty())
-    return res
-      .status(400)
-      .json({ error: errors.array({ onlyFirstError: true })[0] });
-
-  const { userId, iam, transactionId, gemsToDeduct = 0 } = req.body;
-
-  const user = await UserAccount.findOne({ id: userId });
-  console.log(`mebership type: ${user.membershipType}`)
-  const merchant = await Merchant.findOne({ iam });
-  const vendor = await Vendor.findOne({ _id: merchant.vendor });
-
-  const transaction = await fetchTransactionFromDB(
-    vendor.config,
-    transactionId
-  );
-
-  const total = toDinero(
-    Number.parseInt(transaction.total.replace(/\./gi, ""))
-  );
+const computeTransactionBreakdown = ({
+  currentGems,
+  total,
+  gemsToDeduct,
+  membershipType,
+  loyaltyPercentage
+}) => {
   let amountToPay = total;
 
   /* Todo: use a more complex algorithm, to detect if the user has enough points 
      taking into consideration free gems and claimables */
-  if (user.gemPoints.currentGems < gemsToDeduct) {
+  if (currentGems < gemsToDeduct) {
     /* Stop the transaction here the user doesn't have enough gems */
-    return res.status(403).send({
-      error: "User doesn't have enough points to process transaction"
-    });
+    throw new error("User doesn't have enough points to process transaction");
   }
 
   /* Remove gem points worth from the lump sum */
@@ -70,18 +53,69 @@ router.post("/add", NewTransactionValidator, async (req, res) => {
     gold: 10 /* 10% */,
     platinum: 30 /* 30% */
   };
-  const discountFactor = membershipDiscountMap[user.membershipType];
+  const discountFactor = membershipDiscountMap[membershipType];
   const membershipDiscount = amountToPay.percentage(discountFactor);
   /* Basically what remains after the membership discount has been applied */
-  const payable = amountToPay.percentage(
-    vendor.loyaltyPercentage - discountFactor
-  );
+  const payable = amountToPay.percentage(loyaltyPercentage - discountFactor);
   amountToPay = amountToPay.subtract(membershipDiscount);
 
   /* Compute the number of gem points the user can gain from the transaction */
   const cashToGemFactor = 100;
   const gemsToAward = stripPrecision(amountToPay.divide(cashToGemFactor));
 
+  return {
+    payable,
+    gemsToAward,
+    amountToPay,
+    gemsToAward,
+    discount: { membershipDiscount, gemDiscount }
+  };
+};
+
+router.post("/add", NewTransactionValidator, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty())
+    return res
+      .status(400)
+      .json({ error: errors.array({ onlyFirstError: true })[0] });
+
+  const { userId, iam, transactionId, gemsToDeduct = 0 } = req.body;
+
+  const user = await UserAccount.findOne({ id: userId });
+  console.log(`mebership type: ${user.membershipType}`);
+  const merchant = await Merchant.findOne({ iam });
+  const vendor = await Vendor.findOne({ _id: merchant.vendor });
+
+  const transaction = await fetchTransactionFromDB(
+    vendor.config,
+    transactionId
+  );
+
+  const total = toDinero(
+    Number.parseInt(transaction.total.replace(/\./gi, ""))
+  );
+
+  let breakdown;
+
+  try {
+    const options = {
+      total,
+      gemsToDeduct,
+      membershipType: user.membershipType,
+      currentGems: user.gemPoints.currentGems,
+      loyaltyPercentage: vendor.loyaltyPercentage
+    };
+    breakdown = computeTransactionBreakdown(options);
+  } catch (error) {
+    return res.status(403).send(error);
+  }
+
+  const {
+    payable,
+    gemsToAward,
+    amountToPay,
+    discount: { membershipDiscount, gemDiscount }
+  } = breakdown;
   const totalSpend = toDinero(user.totalSpend).add(amountToPay);
 
   // Check if user needs a membership upgrade
@@ -103,12 +137,16 @@ router.post("/add", NewTransactionValidator, async (req, res) => {
     user.membershipType = "platinum";
 
   user.totalSpend = totalSpend.toObject();
-  user.decrementGems(gemsToDeduct)
+  user.decrementGems(gemsToDeduct);
   user.incrementGems(gemsToAward);
 
   /* Update overall payables for vendor */
-  vendor.payable = toDinero(vendor.payable).add(amountToPay).toObject();
-  vendor.revenue = toDinero(vendor.revenue).add(payable).toObject()
+  vendor.payable = toDinero(vendor.payable)
+    .add(amountToPay)
+    .toObject();
+  vendor.revenue = toDinero(vendor.revenue)
+    .add(payable)
+    .toObject();
 
   // Create a transaction record to represent the transaction
   const transactionRecord = new TransactionRecord({
@@ -130,14 +168,21 @@ router.post("/add", NewTransactionValidator, async (req, res) => {
   });
 
   console.log(`gem discount: ${gemDiscount.toFormat("$0,0.00")}`);
-  console.log(`membership discount: ${membershipDiscount.toFormat("$0,0.00")} `);
+  console.log(
+    `membership discount: ${membershipDiscount.toFormat("$0,0.00")} `
+  );
   console.log(`payable: ${payable.toFormat("$0,0.00")} `);
   console.log(`user pays: ${amountToPay.toFormat("$0,0.00")}`);
   console.log(`user awarded: ${gemsToAward} gems`);
   console.log(`deducted: ${gemsToDeduct} gems`);
 
   try {
-    await Promise.all([user.save(), vendor.save(), merchant.save(), transactionRecord.save()]);
+    await Promise.all([
+      user.save(),
+      vendor.save(),
+      merchant.save(),
+      transactionRecord.save()
+    ]);
     return res.send(
       _.pick(transactionRecord, [
         "payable",
@@ -152,56 +197,41 @@ router.post("/add", NewTransactionValidator, async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-  if (!req.query.id)
-    return res.status(400).json({ error: "Vendor ID not supplied!" });
+  let query = {};
 
-  let vendorId = req.query.id;
-  vendorId = mongoose.Types.ObjectId.createFromHexString(vendorId);
+  if (req.query.userId) {
+    const userId = mongoose.Types.ObjectId.createFromHexString(
+      req.query.userId
+    );
+    query = { user: userId };
+  }
 
-  Transaction.find({ vendor: vendorId })
-    .populate("servicedBy", "iam")
-    .populate("citizen", "name")
-    .select({ _id: 0 })
-    .lean()
-    .then(result => {
-      console.log(result);
-      if (!result)
-        return res
-          .status(404)
-          .json({ error: "There are no transactions currently!" });
-      return res.json(result);
-    })
-    .catch(error => {
-      console.log(error);
-      return res.status(500).send({
-        error: "An error ocurred while pulling transactions from the database!"
-      });
+  if (req.query.vendorId) {
+    const vendorId = mongoose.Types.ObjectId.createFromHexString(
+      req.query.vendorId
+    );
+    query = { vendor: vendorId };
+  }
+
+  let predicator = Transaction.find({ ...query });
+  if (req.query.id) {
+    predicator = Transaction.findOne({ transactionId: req.query.id });
+  }
+
+  try {
+    const result = await predicator
+      .populate("servicedBy", "iam")
+      .populate("user", "name")
+      .select({ _id: 0 })
+      .lean();
+
+    return res.send(result);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      error: "An error ocurred while pulling transactions from the database!"
     });
-});
-
-router.get("/", async (req, res) => {
-  if (!req.query.id)
-    return res.status(400).json({ error: "Pls provide the transaction ID!!" });
-
-  const transactionId = req.query.id;
-
-  Transaction.findOne({ transactionId })
-    .populate("servicedBy", "iam")
-    .populate("citizen", "name")
-    .populate("items")
-    .select({ _id: 0 })
-    .lean()
-    .then(async result => {
-      return result
-        ? res.json(result)
-        : res.status(404).json({ error: "transaction Not found!" });
-    })
-    .catch(error => {
-      console.log(error);
-      return res.status(500).json({
-        error: "An error ocurred while pulling transaction from the database!"
-      });
-    });
+  }
 });
 
 module.exports = router;
