@@ -5,7 +5,6 @@ const morgan = require("morgan")("tiny");
 const UserAccountController = require("./controllers/useraccount.controller");
 const VendorController = require("./controllers/vendor.controller");
 const MerchantController = require("./controllers/merchant.controller");
-// const PointsController = require("./controllers/points.controller");
 const AdminController = require("./controllers/admin.controller");
 const TransactionController = require("./controllers/transaction.controller");
 const OfferController = require("./controllers/offer.controller");
@@ -17,12 +16,11 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const chalk = require("chalk").default;
 
-
 function _bootstrapApp() {
   // Create Express server
   const app = express();
 
-  // Initializing Middlewares
+  // Initializing Middleware
   app.use(errorHandler());
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -33,7 +31,6 @@ function _bootstrapApp() {
   app.use("/api/user", UserAccountController);
   app.use("/api/vendor", VendorController);
   app.use("/api/merchant", MerchantController);
-  // app.use("/api/points", PointsController);
   app.use("/api/admin", AdminController);
   app.use("/api/transaction", TransactionController);
   app.use("/api/offer", OfferController);
@@ -60,7 +57,6 @@ module.exports = () => {
       })
       .catch(error => {
         reject(error);
-        /* kill the server if we can't connect */
       });
   });
 };
