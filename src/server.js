@@ -17,10 +17,8 @@ const cors = require("cors");
 const chalk = require("chalk").default;
 
 function _bootstrapApp() {
-  // Create Express server
   const app = express();
 
-  // Initializing Middleware
   app.use(errorHandler());
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
