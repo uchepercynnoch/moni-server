@@ -27,14 +27,19 @@ router.post("/add", async (req, res) => {
 
 //TODO: add jwt middleware
 router.get("/", async (req, res) => {
-    Vendor.find()
-        .select({ _id: 0 })
+    const query = null;
+    if (req.query.id)
+        query = Vendor.findOne({ id: req.query.id });
+    else 
+        query = Vendor.find();
+        
+    query.select({ _id: 0 })
         .lean()
-        .then(results => {
-            if (!results) throw "There are no vendors";
-            return res.json(results);
-        })
-        .catch(error => res.status(500).send({ error: "An error while pulling out db data" }));
+        .then(result => {
+           if (!result) throw "There are no vendors";
+                return res.json(result);
+            })
+            .catch(error => res.status(500).send({ error: "An error while pulling out db data" }));
 });
 
 module.exports = router;
