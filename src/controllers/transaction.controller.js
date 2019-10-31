@@ -173,12 +173,12 @@ router.post('/add', NewTransactionValidator, async (req, res) => {
         gemsDeducted: gemsToDeduct,
     })
 
-    console.log(`gem discount: ${gemDiscount.toFormat('$0,0.00')}`)
+    console.log(`gem discount: ${gemDiscount.toFormat()}`)
     console.log(
-        `membership discount: ${membershipDiscount.toFormat('$0,0.00')} `
+        `membership discount: ${membershipDiscount.toFormat(gemsToDeduct)} `
     )
-    console.log(`payable: ${payable.toFormat('$0,0.00')} `)
-    console.log(`user pays: ${amountToPay.toFormat('$0,0.00')}`)
+    console.log(`payable: ${payable.toFormat()} `)
+    console.log(`user pays: ${amountToPay.toFormat()}`)
     console.log(`user awarded: ${gemsToAward} gems`)
     console.log(`deducted: ${gemsToDeduct} gems`)
 
