@@ -1,8 +1,8 @@
 const router = require('express').Router()
 const Transaction = require('../models/transactionRecord.model')
 const {
-    Transaction: { NewTransactionValidator },
-    validationResult,
+    Transaction: { NewTransactionValidator, BreakdownValidator },
+    validationResult
 } = require('../validators')
 const UserAccount = require('../models/useraccount.model')
 const Merchant = require('../models/merchant.model')
@@ -18,7 +18,7 @@ const computeTransactionBreakdown = ({
     total,
     gemsToDeduct,
     membershipType,
-    loyaltyPercentage,
+    loyaltyPercentage
 }) => {
     let amountToPay = total
 
@@ -40,7 +40,7 @@ const computeTransactionBreakdown = ({
         regular: 0,
         blue: 5,
         gold: 10,
-        platinum: 30,
+        platinum: 30
     }
     const discountFactor = membershipDiscountMap[membershipType]
     const membershipDiscount = amountToPay.percentage(discountFactor)
@@ -57,11 +57,11 @@ const computeTransactionBreakdown = ({
         gemsToAward,
         amountToPay,
         gemsToAward,
-        discount: { membershipDiscount, gemDiscount },
+        discount: { membershipDiscount, gemDiscount }
     }
 }
 
-router.post('/breakdown', async (req, res) => {
+router.post('/breakdown', BreakdownValidator, async (req, res) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         const error = { error: errors.array({ onlyFirstError: true })[0] }
@@ -92,9 +92,10 @@ router.post('/breakdown', async (req, res) => {
             gemsToDeduct,
             membershipType: user.membershipType,
             currentGems: user.gemPoints.currentGems,
-            loyaltyPercentage: vendor.loyaltyPercentage,
+            loyaltyPercentage: vendor.loyaltyPercentage
         }
         breakdown = computeTransactionBreakdown(options)
+        delete breakdown.payable
         return res.send({ ...breakdown })
     } catch (error) {
         console.log(error)
@@ -144,7 +145,7 @@ router.post('/add', NewTransactionValidator, async (req, res) => {
             gemsToDeduct,
             membershipType: user.membershipType,
             currentGems: user.gemPoints.currentGems,
-            loyaltyPercentage: vendor.loyaltyPercentage,
+            loyaltyPercentage: vendor.loyaltyPercentage
         }
         breakdown = computeTransactionBreakdown(options)
     } catch (error) {
@@ -156,7 +157,7 @@ router.post('/add', NewTransactionValidator, async (req, res) => {
         payable,
         gemsToAward,
         amountToPay,
-        discount: { membershipDiscount, gemDiscount },
+        discount: { membershipDiscount, gemDiscount }
     } = breakdown
     const totalSpend = toDinero(user.totalSpend).add(amountToPay)
 
@@ -200,7 +201,7 @@ router.post('/add', NewTransactionValidator, async (req, res) => {
         vendor: vendor._id,
         discount: {
             gems: gemDiscount.toObject(),
-            membership: membershipDiscount.toObject(),
+            membership: membershipDiscount.toObject()
         },
         /* Todo: skip this field if we're on a 3rd party vendor */
         items: transaction.products,
@@ -208,7 +209,7 @@ router.post('/add', NewTransactionValidator, async (req, res) => {
         servicedBy: merchant._id,
         total: total.toObject(),
         gemsAwarded: gemsToAward,
-        gemsDeducted: gemsToDeduct,
+        gemsDeducted: gemsToDeduct
     })
 
     console.log(`gem discount: ${gemDiscount.toFormat()}`)
@@ -223,11 +224,11 @@ router.post('/add', NewTransactionValidator, async (req, res) => {
             user.save(),
             vendor.save(),
             merchant.save(),
-            transactionRecord.save(),
+            transactionRecord.save()
         ])
         return res.send(
             await TransactionRecord.findOne({
-                transactionId: transactionRecord.transactionId,
+                transactionId: transactionRecord.transactionId
             }).lean()
         )
     } catch (error) {
