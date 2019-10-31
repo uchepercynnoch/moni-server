@@ -16,11 +16,7 @@ const errorHandler = require("errorhandler");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const chalk = require("chalk").default;
-const Dinero = require("dinero.js");
 
-/* Configure dinero globals */
-Dinero.globalFormat = "$0,0.00";
-Dinero.globalLocale = "en-NG";
 
 function _bootstrapApp() {
   // Create Express server

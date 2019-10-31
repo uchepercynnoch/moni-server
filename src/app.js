@@ -1,20 +1,31 @@
-const server = require("./server");
-const PORT = process.env.PORT || 5000;
+const server = require('./server')
+const Dinero = require('dinero.js')
+
+const PORT = process.env.PORT || 5000
 
 const bindServer = app => {
-  app.listen(PORT, () => {
-    console.log(
-      `App is running at http://localhost:${PORT} in ${process.env.NODE_ENV} mode`
-    );
-  });
-};
+    app.listen(PORT, () => {
+        console.log(
+            `App is running at http://localhost:${PORT} in ${process.env.NODE_ENV} mode`
+        )
+    })
+}
 
-const desctructivelyExit = reason => {
-  /* We should probably log this first */
-  console.log(reason);
-  process.exit(1);
-};
+const registerGlobals = (app) => {
+    /* Configure dinero globals */
+    Dinero.globalFormat = '$0,0.00'
+    Dinero.globalLocale = 'en-NG'
+
+    return app
+}
+
+const exit = reason => {
+    /* Log and gracefully terminate the app */
+    console.log(reason)
+    process.exit(1)
+}
 
 server()
-  .then(bindServer)
-  .catch(desctructivelyExit);
+    .then(registerGlobals)
+    .then(bindServer)
+    .catch(exit)
