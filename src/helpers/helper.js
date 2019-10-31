@@ -1,7 +1,7 @@
 const authJwt = require('express-jwt')
 const UserAccount = require('../models/useraccount.model')
 
-const toObjectId = value => mongoose.Types.ObjectId.createFromHexString(value)
+const parseObjectId = value => mongoose.Types.ObjectId.createFromHexString(value)
 
 const uploadDestination = '/uploads'
 
@@ -21,5 +21,5 @@ module.exports = {
     jwtAuthMiddleware,
     checkVerifiedStatus,
     uploadDestination,
-    toObjectId,
+    parseObjectId,
 }

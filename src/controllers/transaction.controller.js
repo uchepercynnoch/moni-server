@@ -1,29 +1,17 @@
 const router = require('express').Router()
 const Transaction = require('../models/transactionRecord.model')
-const { check, validationResult } = require('express-validator')
-const { toObjectId } = require('../helpers/helper')
+const {
+    Transaction: { NewTransactionValidator },
+    validationResult,
+} = require('../validators')
 const UserAccount = require('../models/useraccount.model')
 const Merchant = require('../models/merchant.model')
 const TransactionRecord = require('../models/transactionRecord.model')
 const Vendor = require('../models/vendor.model')
 const shortid = require('shortid')
+const { parseObjectId } = require('../helpers/helper')
 const { fetchTransactionFromDB } = require('../helpers/db-helper')
 const { toDinero, stripPrecision } = require('../helpers/dinero-helper')
-
-const NewTransactionValidator = [
-    check('userId', 'Please supply the customers ID')
-        .isString()
-        .not()
-        .isEmpty(),
-    check('iam', 'Please supply the merchat IAM')
-        .isString()
-        .not()
-        .isEmpty(),
-    check('gemsToDeduct').isNumeric(),
-]
-
-/* Note: currenlty assumes a 1 GEM -> 1 NGA conversion ratio */
-const convertGemsToCash = gemValue => toDinero(gemValue, true)
 
 const computeTransactionBreakdown = ({
     currentGems,
@@ -42,16 +30,17 @@ const computeTransactionBreakdown = ({
         )
     }
 
-    /* Apply a discount based on gems to deduct (if any) */
-    const gemDiscount = convertGemsToCash(gemsToDeduct)
+    /* Apply a discount based on gems to deduct (if any) 
+       NOTE: conversion of gems to cash assumes 1 GEM -> 1 NGA */
+    const gemDiscount = toDinero(gemsToDeduct, true)
     amountToPay = amountToPay.subtract(gemDiscount)
 
     /* Apply a discount based on membership type */
     const membershipDiscountMap = {
-        regular: 0 /* 0% */,
-        blue: 5 /* 5% */,
-        gold: 10 /* 10% */,
-        platinum: 30 /* 30% */,
+        regular: 0,
+        blue: 5,
+        gold: 10,
+        platinum: 30,
     }
     const discountFactor = membershipDiscountMap[membershipType]
     const membershipDiscount = amountToPay.percentage(discountFactor)
@@ -72,22 +61,74 @@ const computeTransactionBreakdown = ({
     }
 }
 
-router.post('/add', NewTransactionValidator, async (req, res) => {
+router.post('/breakdown', async (req, res) => {
     const errors = validationResult(req)
-    if (!errors.isEmpty())
+    if (!errors.isEmpty()) {
+        const error = { error: errors.array({ onlyFirstError: true })[0] }
+        return res.status(400).json(error)
+    }
+
+    const { userId, iam, gemsToDeduct = 0, transactionTotal } = req.body
+
+    const user = await UserAccount.findOne({ id: userId })
+    if (!user) return res.status(400).send({ error: 'invalid user id' })
+
+    const merchant = await Merchant.findOne({ iam })
+    if (!merchant) return res.status(400).send({ error: 'invalid merchant id' })
+
+    const vendor = await Vendor.findOne({ _id: merchant.vendor })
+    if (!vendor)
         return res
             .status(400)
-            .json({ error: errors.array({ onlyFirstError: true })[0] })
+            .send({ error: "can't find parent vendor for merchant" })
+
+    total = toDinero(Number.parseInt(transactionTotal.replace(/\./gi, '')))
+
+    let breakdown
+
+    try {
+        const options = {
+            total,
+            gemsToDeduct,
+            membershipType: user.membershipType,
+            currentGems: user.gemPoints.currentGems,
+            loyaltyPercentage: vendor.loyaltyPercentage,
+        }
+        breakdown = computeTransactionBreakdown(options)
+        return res.send({ ...breakdown })
+    } catch (error) {
+        console.log(error)
+        return res.status(403).send({ error: error.message })
+    }
+})
+
+router.post('/add', NewTransactionValidator, async (req, res) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        const error = { error: errors.array({ onlyFirstError: true })[0] }
+        return res.status(400).json(error)
+    }
 
     const { userId, iam, transactionId, gemsToDeduct = 0 } = req.body
 
     const user = await UserAccount.findOne({ id: userId })
+    if (!user) return res.status(400).send({ error: 'invalid user id' })
+
     const merchant = await Merchant.findOne({ iam })
+    if (!merchant) res.status(400).send({ error: 'invalid merchant id' })
+
     const vendor = await Vendor.findOne({ _id: merchant.vendor })
-    const transaction = await fetchTransactionFromDB(
-        vendor.config,
-        transactionId
-    )
+    if (!vendor)
+        res.status(400).send({ error: "can't find parent vendor for merchant" })
+
+    let transaction = { total: 0 }
+    try {
+        transaction = await fetchTransactionFromDB(vendor.config, transactionId)
+        if (!transaction) res.status(400).send('Failed to fetch transaction')
+    } catch (error) {
+        console.log(error)
+        res.status(400).send(error.message)
+    }
 
     console.log(`mebership type: ${user.membershipType}`)
 
@@ -198,8 +239,9 @@ router.get('/', async (req, res) => {
     let query = {},
         findOne = false
 
-    if (req.query.userId) query = { user: toObjectId(req.query.userId) }
-    if (req.query.vendorId) query = { vendor: toObjectId(req.query.vendorId) }
+    if (req.query.userId) query = { user: parseObjectId(req.query.userId) }
+    if (req.query.vendorId)
+        query = { vendor: parseObjectId(req.query.vendorId) }
     if (req.query.id) {
         query = { transactionId: req.query.id }
         findOne = true
