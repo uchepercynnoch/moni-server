@@ -11,10 +11,12 @@ const bindServer = app => {
     })
 }
 
-const registerGlobals = (app) => {
+const registerGlobals = app => {
     /* Configure dinero globals */
     Dinero.globalFormat = '$0,0.00'
+    Dinero.defaultCurrency = 'NGN'
     Dinero.globalLocale = 'en-NG'
+    Dinero.defaultPrecision = 2 /* The naira's got a precision of 2 */
 
     return app
 }

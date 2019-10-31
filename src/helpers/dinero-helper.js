@@ -12,7 +12,7 @@ const toDinero = (value, padWithPrecisionZeros = false) => {
     /* Pad while respecting the precsison */
     const pad = (x, p) => Number.parseInt(String(x) + _.repeat('0', p))
 
-    let opts = { amount: 0, currency: 'NGN', precision: 2 }
+    let opts = { amount: 0 }
 
     if (typeof value === 'number') opts.amount = value
     else if (typeof value === 'object')

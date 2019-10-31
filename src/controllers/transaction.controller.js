@@ -9,7 +9,6 @@ const Vendor = require('../models/vendor.model')
 const shortid = require('shortid')
 const { fetchTransactionFromDB } = require('../helpers/db-helper')
 const { toDinero, stripPrecision } = require('../helpers/dinero-helper')
-const _ = require('lodash/object')
 
 const NewTransactionValidator = [
     check('userId', 'Please supply the customers ID')
@@ -38,13 +37,12 @@ const computeTransactionBreakdown = ({
     /* Todo: use a more complex algorithm, to detect if the user has enough points 
      taking into consideration free gems and claimables */
     if (currentGems < gemsToDeduct) {
-        /* Stop the transaction here the user doesn't have enough gems */
         throw new Error(
             "User doesn't have enough points to process transaction"
         )
     }
 
-    /* Remove gem points worth from the lump sum */
+    /* Apply a discount based on gems to deduct (if any) */
     const gemDiscount = convertGemsToCash(gemsToDeduct)
     amountToPay = amountToPay.subtract(gemDiscount)
 
@@ -57,7 +55,7 @@ const computeTransactionBreakdown = ({
     }
     const discountFactor = membershipDiscountMap[membershipType]
     const membershipDiscount = amountToPay.percentage(discountFactor)
-    /* Basically what remains after the membership discount has been applied */
+    /* Payable is the un-used portion of the fixed membership discount  */
     const payable = amountToPay.percentage(loyaltyPercentage - discountFactor)
     amountToPay = amountToPay.subtract(membershipDiscount)
 
@@ -121,11 +119,11 @@ router.post('/add', NewTransactionValidator, async (req, res) => {
     } = breakdown
     const totalSpend = toDinero(user.totalSpend).add(amountToPay)
 
-    // Check if user needs a membership upgrade
     const ONE_HUNDRED_THOUSAND = toDinero(10000000)
     const ONE_MILLION = toDinero(100000000)
     const FIVE_MILLION = toDinero(500000000)
 
+    // Check if user needs a membership upgrade
     if (
         totalSpend.greaterThanOrEqual(ONE_HUNDRED_THOUSAND) &&
         totalSpend.lessThan(ONE_MILLION)
@@ -143,7 +141,7 @@ router.post('/add', NewTransactionValidator, async (req, res) => {
     user.decrementGems(gemsToDeduct)
     user.incrementGems(gemsToAward)
 
-    /* Update overall payables for vendor */
+    /* Update cash fields on the vendor model */
     vendor.payable = toDinero(vendor.payable)
         .add(amountToPay)
         .toObject()
@@ -157,7 +155,6 @@ router.post('/add', NewTransactionValidator, async (req, res) => {
     // Create a transaction record to represent the transaction
     const transactionRecord = new TransactionRecord({
         transactionId: shortid.generate(),
-        date: Date.now(),
         user: user._id,
         vendor: vendor._id,
         discount: {
@@ -174,9 +171,7 @@ router.post('/add', NewTransactionValidator, async (req, res) => {
     })
 
     console.log(`gem discount: ${gemDiscount.toFormat()}`)
-    console.log(
-        `membership discount: ${membershipDiscount.toFormat(gemsToDeduct)} `
-    )
+    console.log(`membership discount: ${membershipDiscount.toFormat()} `)
     console.log(`payable: ${payable.toFormat()} `)
     console.log(`user pays: ${amountToPay.toFormat()}`)
     console.log(`user awarded: ${gemsToAward} gems`)
@@ -222,10 +217,7 @@ router.get('/', async (req, res) => {
         return res.send(result)
     } catch (error) {
         console.log(error)
-        return res.status(500).send({
-            error:
-                'An error ocurred while pulling transactions from the database!',
-        })
+        return res.status(500).send({ error: error.message })
     }
 })
 
