@@ -1,26 +1,31 @@
-const shortid = require("shortid");
-const moment = require("moment");
-const { fetchTransactionFromDB } = require("./src/helpers/db-helper");
+// const shortid = require("shortid");
+// const moment = require("moment");
+// const { fetchTransactionFromDB } = require("./src/helpers/db-helper");
 
-const date = Date.now();
-console.log(moment().format("LLLL"));
+// const date = Date.now();
+// console.log(moment().format("LLLL"));
 
-const dinero = require("dinero.js");
-const cash = dinero({ amount: 0, currency: "NGN" }).setLocale("en-NG");
-console.log(cash.toObject());
+// const dinero = require("dinero.js");
+// const cash = dinero({ amount: 0, currency: "NGN" }).setLocale("en-NG");
+// console.log(cash.toObject());
 
-const config = {
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "monidb"
-};
+// const config = {
+//   host: "localhost",
+//   user: "root",
+//   password: "",
+//   database: "monidb"
+// };
 
-(async () => {
-  try {
-    const result = await fetchTransactionFromDB(config, "1572297596218-1-9134");
-    console.log(result);
-  } catch (error) {
-    console.log("Caught", error.message);
-  }
-})();
+// (async () => {
+//   try {
+//     const result = await fetchTransactionFromDB(config, "1572297596218-1-9134");
+//     console.log(result);
+//   } catch (error) {
+//     console.log("Caught", error.message);
+//   }
+// })();
+const fs = require("fs-extra")
+fs.copy("../moni-dashboard/build", "./client", err => {
+  if(err) console.log(err);
+  else console.log("Success!");
+})

@@ -207,40 +207,13 @@ router.post("/login", async (req, res) => {
             id: account.id,
             name: account.name,
             email: account.email,
-            verified: account.verified
+            verified: account.verified,
+            _id: account._id
         },
         process.env.JWT_SECRET,
         { expiresIn: "2 days" }
     );
     return res.send({ token });
-});
-
-router.get("/", async (req, res) => {
-    if (!req.query.userId) return res.status(400).send({ error: "Invalid userId" });
-
-    UserAccount.findOne({ id: req.query.userId })
-        .populate({
-            path: "transactions",
-            select: "items servicedBy transactionId type gainedPoints deductedPoints",
-            populate: {
-                path: "items servicedBy",
-                select: "name iam"
-            }
-        })
-        .select({
-            name: 1,
-            _id: 0,
-            gender: 1,
-            email: 1,
-            loyaltyPoints: 1,
-            phoneNumber: 1,
-            transactions: 1,
-            membershipType: 1,
-            verified: 1,
-            id: 1
-        })
-        .then(result => (result ? res.send(result) : res.status(404).send({ error: "User does not exist!" })))
-        .catch(_ => res.status(404).send("An error ocurred while pulling user data!"));
 });
 
 router.post("/pref", async (req, res) => {
@@ -301,39 +274,36 @@ router.get("/firstCheck", async (req, res) => {
         });
 });
 
-router.get("/all", async (req, res) => {
-    if (!req.query.id) return res.status(400).send({ error: "Invalid userId" });
-    let vendorId = req.query.id;
-    vendorId = mongoose.Types.ObjectId.createFromHexString(vendorId);
+router.get("/", async (req,res) => {
+    let query = null;
+    if(req.query.id){
+        const id = mongoose.Types.ObjectId.createFromHexString(req.query.id);
+        query = UserAccount.findOne({_id: id});
+    }
+    else
+        query = UserAccount.find();
 
-    UserAccount.find({})
-        .select({
-            id: 1,
-            name: 1,
-            _id: 0,
-            gender: 1,
-            email: 1,
-            loyaltyPoints: 1,
-            phoneNumber: 1,
-            membershipType: 1,
-            transactions: 1
-        })
-        .populate("transactions")
+    query.select({
+        id: 1,
+        name: 1,
+        _id: 1,
+        gender: 1,
+        email: 1,
+        gemPoints: 1,
+        phoneNumber: 1,
+        membershipType: 1,
+        verified: 1,
+        totalSpend: 1
+    })
         .lean()
         .then(result => {
             if (!result) return res.status(404).send({ error: "There are no users currently!" });
-            let obj = [];
-            result.forEach(account => {
-                let transactions = account.transactions.map(transaction => transaction.vendor === vendorId);
-                let $account = { ...account, transactions };
-                obj.push($account);
-            });
-            console.log(obj);
-            return res.send(obj);
+            return res.send(result);
         })
         .catch(error => {
             console.log(error);
             return res.status(404).send("An error ocurred while pulling user data!");
         });
 });
+
 module.exports = router;

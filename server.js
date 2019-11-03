@@ -2,25 +2,28 @@ const express = require("express");
 const dotenv = require("dotenv");
 dotenv.config();
 const morgan = require("morgan")("tiny");
-const UserAccountController = require("./controllers/useraccount.controller");
-const VendorController = require("./controllers/vendor.controller");
-const MerchantController = require("./controllers/merchant.controller");
+const UserAccountController = require("./src/controllers/useraccount.controller");
+const VendorController = require("./src/controllers/vendor.controller");
+const MerchantController = require("./src/controllers/merchant.controller");
 // const PointsController = require("./controllers/points.controller");
-const AdminController = require("./controllers/admin.controller");
-const TransactionController = require("./controllers/transaction.controller");
-const OfferController = require("./controllers/offer.controller");
-const NewsController = require("./controllers/news.controller");
-const AnalyticsController = require("./controllers/analytics.controller");
+const AdminController = require("./src/controllers/admin.controller");
+const TransactionController = require("./src/controllers/transaction.controller");
+const OfferController = require("./src/controllers/offer.controller");
+const NewsController = require("./src/controllers/news.controller");
+const AnalyticsController = require("./src/controllers/analytics.controller");
 const bodyParser = require("body-parser");
 const errorHandler = require("errorhandler");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const chalk = require("chalk").default;
+const path = require("path");
 
 function _bootstrapApp() {
   // Create Express server
   const app = express();
 
+  app.use(express.static(path.join(__dirname, 'client/build')));
+  
   // Initializing Middlewares
   app.use(errorHandler());
   app.use(bodyParser.json());
@@ -42,6 +45,11 @@ function _bootstrapApp() {
   app.get("/api/test", (_, res) =>
     res.send({ satus: "ok", messgage: "smoke test" })
   );
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname+'/client/build/index.html'));
+  });
+
   return app;
 }
 

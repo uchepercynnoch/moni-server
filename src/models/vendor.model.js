@@ -15,6 +15,7 @@ const VendorSchema = new Schema({
   vendorName: { type: String, required: true },
   location: { type: String, required: true },
   iamAlias: { type: String, required: true },
+  email: {type: String, required: true},
   // imageId: { type: String },
   total: { type: DineroSchema, default: toDinero(0).toObject() },
   payable: { type: DineroSchema, default: toDinero(0).toObject() },

@@ -1,0 +1,21 @@
+.horizontal-align {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-input {
+    margin: 10px;
+}
+
+.align-select{
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+}
+.form-select {
+    align-self: flex-start;
+    width: 45%;
+    margin: 10px !important;
+}

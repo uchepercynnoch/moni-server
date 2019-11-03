@@ -20,6 +20,8 @@ router.post("/", upload.single("offerImage"), async (req, res) => {
     if (!req.file || !req.body.percentage || !req.body.title || !req.body.vendorId)
         return res.status(400).send({ error: "Provide all required fields!" });
 
+        console.log(req.body);
+
     const offer = {
         title: req.body.title,
         offerPercentage: req.body.percentage,
@@ -27,7 +29,7 @@ router.post("/", upload.single("offerImage"), async (req, res) => {
         membershipType: req.body.membershipType,
         ageRange: req.body.ageRange,
         preferences: req.body.preferences.split(","),
-        vendor: mongoose.Types.ObjectId.createFromHexString(req.body.vendorId)
+        // vendor: mongoose.Types.ObjectId.createFromHexString(req.body.vendorId)
     };
     console.log(offer);
     const newOffer = await Offer(offer);
@@ -38,21 +40,22 @@ router.post("/", upload.single("offerImage"), async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-    const vendorId = mongoose.Types.ObjectId.createFromHexString(req.query.id);
-    Offer.find({ vendor: vendorId })
+    let query = null;
+    if(req.query.id){
+        const id = mongoose.Types.ObjectId.createFromHexString(req.query.id);
+        query = Offer.findOne({ _id: id });
+    }
+    else if(req.query.vendorId){
+        const vendorId = mongoose.Types.ObjectId.createFromHexString(req.query.vendorId);
+        query = Offer.find({ vendor: vendorId });
+    }
+    else
+        query = Offer.find();
+
+    query
         .lean()
         .then(results =>
             results ? res.send(results) : res.status(400).json({ error: "Couldn't retrieve offers!" })
-        )
-        .catch(error => res.status(500).send({ error }));
-});
-
-router.get("/single", async (req, res) => {
-    const offerId = mongoose.Types.ObjectId.createFromHexString(req.query.id);
-    Offer.findOne({ _id: offerId })
-        .lean()
-        .then(result =>
-            result ? res.send(result) : res.status(400).json({ error: "Couldn't retrieve offer!" })
         )
         .catch(error => res.status(500).send({ error }));
 });
@@ -70,7 +73,8 @@ router.post("/update", upload.single("offerImage"), async (req, res) => {
     offer.ageRange = ageRange;
     offer.preferences = preferences.split(",");
     //fs.unlinkSync(`../../uploads/${offer.imageId}`); TODO delete previous file!
-    offer.imageId = req.file.path;
+    if(req.file)
+        offer.imageId = req.file.path;
     const result = await offer.save();
     if (!result) return res.status(400).json({ error: "An error ocurred while updating offer!" });
     return res.send(result);

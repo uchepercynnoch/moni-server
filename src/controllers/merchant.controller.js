@@ -131,8 +131,6 @@ router.post("/login", loginValidation, async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-  const { id, vendorId } = req.query;
-
   /* find the merchant with this id */
   const findMerchantById = id => {
     console.log("Finding by single id: ", id);
@@ -174,10 +172,10 @@ router.get("/", async (req, res) => {
     Merchant.find({}).then(result => res.send(result));
   };
 
-  if (id) {
-    findMerchantById(id);
-  } else if (vendorId) {
-    findAllMerchantsByVendor(vendorId);
+  if (req.query.id) {
+    findMerchantById(req.query.id);
+  } else if (req.query.vendorId) {
+    findAllMerchantsByVendor(req.query.vendorId);
   } else {
     findAllMerchants();
   }

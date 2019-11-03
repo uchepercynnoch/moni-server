@@ -23,7 +23,7 @@ router.post("/", upload.single("newsImage"), async (req, res) => {
         title: req.body.title,
         content: req.body.content,
         imageId: req.file.path,
-        vendor: mongoose.Types.ObjectId.createFromHexString(req.body.vendorId)
+        // vendor: mongoose.Types.ObjectId.createFromHexString(req.body.vendorId)
     };
     console.log(news);
     const newNews = await News(news);
@@ -34,18 +34,23 @@ router.post("/", upload.single("newsImage"), async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-    const vendorId = mongoose.Types.ObjectId.createFromHexString(req.query.id);
-    News.find({ vendor: vendorId })
-        .lean()
-        .then(results => results ? res.send(results) : res.status(400).json({ error: "Couldn't retrieve news!" }))
-        .catch(error => res.status(500).send({ error }));
-});
+    let query = null;
+    if(req.query.id){
+        const id = mongoose.Types.ObjectId.createFromHexString(req.query.id);
+        query = News.findOne({ _id: id });
+    }
+    else if(req.query.vendorId){
+        const vendorId = mongoose.Types.ObjectId.createFromHexString(req.query.vendorId);
+        query = News.find({ vendor: vendorId });
+    }
+    else
+        query = News.find();
 
-router.get("/single", async (req, res) => {
-    const newsId = mongoose.Types.ObjectId.createFromHexString(req.query.id);
-    News.findOne({ _id: newsId })
+    query
         .lean()
-        .then(result => result ? res.send(result) : res.status(400).json({ error: "Couldn't retrieve news!" }))
+        .then(results =>
+            results ? res.send(results) : res.status(400).json({ error: "Couldn't retrieve news!" })
+        )
         .catch(error => res.status(500).send({ error }));
 });
 
@@ -59,7 +64,8 @@ router.post("/update", upload.single("newsImage"), async (req, res) => {
     news.title = title;
     news.content = content;
     //fs.unlinkSync(`../../uploads/${offer.imageId}`); TODO delete previous file!
-    news.imageId = req.file.path;
+    if(req.file)
+        news.imageId = req.file.path;
 
     const result = await news.save();
     if (!result) return res.status(400).json({ error: "An error ocurred while updating news!" });

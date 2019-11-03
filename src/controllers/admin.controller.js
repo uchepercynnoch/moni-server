@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const Admin = require("../models/admin.model");
 const bcrypt = require("bcrypt");
 const { check, validationResult } = require("express-validator");
+const mongoose = require("mongoose");
 
 const regValidation = [
     check("name", "name is required!").isString(),
@@ -92,6 +93,26 @@ router.post("/login", async (req, res) => {
     );
     console.log(token);
     return res.send({ token });
+});
+
+router.get("/", async (req, res) => {
+    let query = null;
+    if(req.query.id){
+        query = Admin.findOne({ id: req.query.id });
+    }
+    else if(req.query.vendorId){
+        const vendorId = mongoose.Types.ObjectId.createFromHexString(req.query.vendorId);
+        query = Admin.find({ vendor: vendorId });
+    }
+    else
+        query = Admin.find();
+
+    query
+    .populate("vendor","vendorName")
+        .lean()
+        .then(results => results ? res.send(results) : res.status(400).json({ error: "Couldn't retrieve Admins!" })
+        )
+        .catch(error => res.status(500).send({ error }));
 });
 
 module.exports = router;

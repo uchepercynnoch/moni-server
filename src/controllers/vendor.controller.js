@@ -27,13 +27,13 @@ router.post("/add", async (req, res) => {
 
 //TODO: add jwt middleware
 router.get("/", async (req, res) => {
-    const query = null;
+    let query = null;
     if (req.query.id)
         query = Vendor.findOne({ id: req.query.id });
     else 
         query = Vendor.find();
         
-    query.select({ _id: 0 })
+    query
         .lean()
         .then(result => {
            if (!result) throw "There are no vendors";
