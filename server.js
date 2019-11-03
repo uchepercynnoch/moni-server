@@ -19,7 +19,6 @@ const chalk = require("chalk").default;
 const path = require("path");
 
 function _bootstrapApp() {
-  // Create Express server
   const app = express();
 
   app.use(express.static(path.join(__dirname, 'client/build')));
@@ -35,7 +34,6 @@ function _bootstrapApp() {
   app.use("/api/user", UserAccountController);
   app.use("/api/vendor", VendorController);
   app.use("/api/merchant", MerchantController);
-  // app.use("/api/points", PointsController);
   app.use("/api/admin", AdminController);
   app.use("/api/transaction", TransactionController);
   app.use("/api/offer", OfferController);
@@ -67,7 +65,6 @@ module.exports = () => {
       })
       .catch(error => {
         reject(error);
-        /* kill the server if we can't connect */
       });
   });
 };

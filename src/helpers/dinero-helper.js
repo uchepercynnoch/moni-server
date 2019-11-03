@@ -1,37 +1,35 @@
-const mongoose = require("mongoose");
-const Dinero = require("dinero.js");
-const _ = require("lodash/object");
+const mongoose = require('mongoose')
+const Dinero = require('dinero.js')
+const _ = require('lodash')
 
 const DineroSchema = new mongoose.Schema({
-  amount: { type: Number, required: true },
-  precision: { type: Number, required: true },
-  currency: { type: String, required: true }
-});
+    amount: { type: Number, required: true },
+    precision: { type: Number, required: true },
+    currency: { type: String, required: true },
+})
 
 const toDinero = (value, padWithPrecisionZeros = false) => {
-  /* Pad while respecting the precsison */
-  const pad = (x, p) => {
-    return Number.parseInt(String(x) + "00");
-  };
+    /* Pad while respecting the precsison */
+    const pad = (x, p) => Number.parseInt(String(x) + _.repeat('0', p))
 
-  let opts = { amount: 0, currency: "NGN", precision: 2 };
+    let opts = { amount: 0 }
 
-  if (typeof value === "number") opts.amount = value;
-  else if (typeof value === "object")
-    opts = { opts, ..._.pick(value, ["amount", "currency", "precision"]) };
+    if (typeof value === 'number') opts.amount = value
+    else if (typeof value === 'object')
+        opts = { opts, ..._.pick(value, ['amount', 'currency', 'precision']) }
 
-  if (padWithPrecisionZeros) opts.amount = pad(opts.amount, opts.precision);
+    if (padWithPrecisionZeros) opts.amount = pad(opts.amount, opts.precision)
 
-  return Dinero({ ...opts });
-};
+    return Dinero({ ...opts })
+}
 
 const stripPrecision = value => {
-  const val = value.getAmount().toString();
-  return Number.parseInt(val.substr(0, val.length - value.getPrecision()));
-};
+    const val = value.getAmount().toString()
+    return Number.parseInt(val.substr(0, val.length - value.getPrecision()))
+}
 
 module.exports = {
-  DineroSchema,
-  toDinero,
-  stripPrecision
-};
+    DineroSchema,
+    toDinero,
+    stripPrecision,
+}
