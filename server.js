@@ -12,7 +12,7 @@ const OfferController = require("./src/controllers/offer.controller");
 const NewsController = require("./src/controllers/news.controller");
 const AnalyticsController = require("./src/controllers/analytics.controller");
 const bodyParser = require("body-parser");
-const errorHandler = require("errorhandler");
+// const errorHandler = require("errorhandler");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const chalk = require("chalk").default;
@@ -24,7 +24,7 @@ function _bootstrapApp() {
   app.use(express.static(path.join(__dirname, 'client/build')));
   
   // Initializing Middlewares
-  app.use(errorHandler());
+  // app.use(errorHandler());
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(morgan);
