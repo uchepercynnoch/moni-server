@@ -18,6 +18,9 @@ const cors = require("cors");
 const chalk = require("chalk").default;
 const path = require("path");
 
+const UserAccount = require("./src/models/useraccount.model");
+const Admin = require("./src/models/admin.model");
+
 function _bootstrapApp() {
   const app = express();
 
@@ -60,8 +63,29 @@ module.exports = () => {
         useNewUrlParser: true,
         useUnifiedTopology: true
       })
-      .then(_ => {
+      .then(async _ => {
         console.log(`[info]: ${chalk.green("Databse connected!")}`);
+        // Fix
+        const user = new UserAccount({
+          "name": "john james2",
+          "email": "jo2hn@gmail.com",
+          "phoneNumber": "09052824862",
+          "gender": "male",
+          "password": "12345678",
+          "ageRange": "20-25"
+        });
+        await user.save();
+
+        const admin = new Admin({
+          "name": "utibe johnson",
+          "email": "utibe@landmark.com",
+          "phoneNumber": "09052814862",
+          "gender": "male",
+          "vendor": "",
+          "password": "12345678"
+        });
+        await admin.save();
+        
         resolve(_bootstrapApp());
       })
       .catch(error => {

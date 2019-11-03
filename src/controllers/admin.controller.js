@@ -86,7 +86,7 @@ router.post("/login", async (req, res) => {
             name: admin.name,
             email: admin.email,
             role: admin.type,
-            vendor: admin.vendor
+            // vendor: admin.vendor
         },
         process.env.JWT_SECRET,
         { expiresIn: "30m" }
