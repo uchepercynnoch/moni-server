@@ -55,7 +55,7 @@ function _bootstrapApp() {
 module.exports = () => {
   return new Promise((resolve, reject) => {
     mongoose
-      .connect("mongodb://localhost:27017/moni", {
+      .connect(process.env.CONN_STRING, {
         useFindAndModify: false,
         useNewUrlParser: true,
         useUnifiedTopology: true
