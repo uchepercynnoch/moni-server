@@ -51,7 +51,7 @@ router.post("/register", regValidation, async (req, res) => {
         phoneNumber,
         gender,
         password,
-        vendor,
+        // vendor,
         email
     });
     if (newAdmin) {
