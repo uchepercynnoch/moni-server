@@ -121,7 +121,7 @@ export default function Transaction() {
     });
 
     useEffect(() => {
-        const url = isSuperAdmin() ? `/transaction` : `/transaction?vendorId=${getUserData().vendor}`;
+        const url = isSuperAdmin() ? `/api/transaction` : `/api/transaction?vendorId=${getUserData().vendor}`;
         createAxiosInstance()
             .get(url)
             .then(res => {
@@ -151,7 +151,7 @@ export default function Transaction() {
 
     const getTransaction = id => {
         createAxiosInstance()
-            .get(`/transaction?id=${id}`)
+            .get(`/api/transaction?id=${id}`)
             .then(res => {
                 const obj = createData(res.data);
                 console.log(obj);

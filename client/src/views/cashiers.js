@@ -117,7 +117,7 @@ export default function Cashiers() {
     });
 
     useEffect(() => {
-        const url = isSuperAdmin() ? `/merchant` : `/merchant?vendorId=${getUserData().vendor}`;
+        const url = isSuperAdmin() ? `/api/merchant` : `/api/merchant?vendorId=${getUserData().vendor}`;
         createAxiosInstance()
             .get(url)
             .then(res => {
@@ -139,7 +139,7 @@ export default function Cashiers() {
         setError(false);
         data.vendor = getUserData().vendor;
         createAxiosInstance()
-            .post("/merchant/register", data)
+            .post("/api/merchant/register", data)
             .then(res => {
                 setSaving(false);
                 setSaved(true);
@@ -158,7 +158,7 @@ export default function Cashiers() {
 
     const getCashier = id => {
         createAxiosInstance()
-            .get(`/merchant?id=${id}`)
+            .get(`/api/merchant?id=${id}`)
             .then(res => {
                 console.log(res.data);
                 setCashier(createSingleData(res.data));
@@ -187,7 +187,7 @@ export default function Cashiers() {
         setSaved(false);
         setError(false);
         createAxiosInstance()
-            .post(`/merchant/update`, cashier)
+            .post(`/api/merchant/update`, cashier)
             .then(res => {
                 setSaving(false);
                 setSaved(true);

@@ -6,10 +6,11 @@ import { Button } from "@material-ui/core";
 import { createAxiosInstance, getUserData, isSuperAdmin } from "../util";
 import OfferRegister from "../components/offer.register";
 import Offer from "../components/offer.modal";
+import Moment from "moment";
 
 const columns = [
     { field: "title", title: "Title", minWidth: 170 },
-    { field: "percentage", title: "Percentage %", minWidth: 100 }
+    { field: "percentage", title: "Percentage", minWidth: 100 }
 ];
 
 function createData(obj) {
@@ -63,7 +64,7 @@ export default function Offers() {
     });
 
     useEffect(() => {
-        const url = isSuperAdmin() ? `/offer` : `/offer?vendorId=${getUserData().vendor}`;
+        const url = isSuperAdmin() ? `/api/offer` : `/api/offer?vendorId=${getUserData().vendor}`;
 
         createAxiosInstance()
             .get(url)
@@ -95,7 +96,7 @@ export default function Offers() {
         formdata.append("vendorId", getUserData().vendor);
 
         createAxiosInstance()
-            .post("/offer", formdata)
+            .post("/api/offer", formdata)
             .then(res => {
                 setSaving(false);
                 setSaved(true);
@@ -114,7 +115,7 @@ export default function Offers() {
 
     const getOffer = id => {
         createAxiosInstance()
-            .get(`/offer?id=${id}`)
+            .get(`/api/offer?id=${id}`)
             .then(res => {
                 console.log(res.data);
                 setOffer(createData(res.data));
@@ -165,7 +166,7 @@ export default function Offers() {
         setSaved(false);
         setError(false);
         createAxiosInstance()
-            .post(`/offer/update?id=${offer.id}`, formdata)
+            .post(`/api/offer/update?id=${offer.id}`, formdata)
             .then(res => {
                 setSaving(false);
                 setSaved(true);

@@ -6,8 +6,6 @@ dotenv.config();
 
 const jwtKey = "admin-secret";
 
-export const baseURL = "http://localhost:4000/";
-
 /* The user is still logged in if there's a token and the token is still valid */
 export function isLoggedIn() {
     return getToken() !== null && jwt.decode(getToken()).exp > Number.parseInt(Date.now() / 1000);
@@ -38,7 +36,6 @@ export function isSuperAdmin() {
 
 export function createAxiosInstance() {
     return axios.create({
-        baseURL: `/api`,
         headers: { Authorization: `Bearer ${getToken()}` }
     });
 }

@@ -47,7 +47,7 @@ export default class AdminChart extends PureComponent {
 
   getVendors() {
     return createAxiosInstance()
-      .get("/vendor")
+      .get("/api/vendor")
       .then(res => res.data);
   }
 

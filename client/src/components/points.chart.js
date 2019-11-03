@@ -32,7 +32,7 @@ export default class PointsChart extends PureComponent {
     super(props);
     this.state = {
       activeIndex: 0,
-      data: null,
+      data: [],
       untransformedData: [],
       selectedVendor: null,
       open: false
@@ -47,18 +47,21 @@ export default class PointsChart extends PureComponent {
 
   getVendor() {
     return createAxiosInstance()
-      .get(`/vendor?id=${getUserData().vendor}`)
+      .get(`/api/vendor?id=${getUserData().vendor}`)
       .then(res => res.data);
   }
 
   componentWillMount() {
     this.getVendor()
       .then(result => {
+        console.log(result);
         const vendor = this.transformData(result);
+        const arr = [...this.state.data];
+        arr.push(vendor);
         this.setState({
           ...this.state,
           untransformedData: result,
-          data: vendor,
+          data: arr,
           selectedVendor: result
         });
       })
@@ -74,42 +77,33 @@ export default class PointsChart extends PureComponent {
       total: item.total.amount
     };
     return obj;
-    return obj;
   }
 
-  handleSelectionChanged = index => {
-    this.setState({
-      ...this.state,
-      selectedVendor: this.state.untransformedData[index]
-    });
-  };
   renderTable(ref) {
     return (
       <div ref={ref}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Vendors</TableCell>
+              <TableCell>Vendor</TableCell>
               <TableCell>Expected Revenue</TableCell>
               <TableCell>Actual Revenue</TableCell>
               <TableCell>Reservior</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {this.state.untransformedData.map((vendor, key) => (
-              <TableRow key={key}>
-                <TableCell>{vendor.vendorName}</TableCell>
+              <TableRow>
+                <TableCell>{this.state.untransformedData.vendorName}</TableCell>
                 <TableCell>
-                  {toDinero(vendor.total).toFormat("$0,0.00")}
+                  {toDinero(this.state.untransformedData.total).toFormat("$0,0.00")}
                 </TableCell>
                 <TableCell>
-                  {toDinero(vendor.revenue).toFormat("$0,0.00")}
+                  {toDinero(this.state.untransformedData.revenue).toFormat("$0,0.00")}
                 </TableCell>
                 <TableCell>
-                  {toDinero(vendor.payable).toFormat("$0,0.00")}
+                  {toDinero(this.state.untransformedData.payable).toFormat("$0,0.00")}
                 </TableCell>
               </TableRow>
-            ))}
           </TableBody>
         </Table>
       </div>
@@ -150,7 +144,8 @@ export default class PointsChart extends PureComponent {
 
     const chipStyle = {
       color: "white",
-      backgroundColor: "#070E2E"
+      backgroundColor: "#070E2E",
+      borderRadius: "0px"
     };
 
     const chartWrapperStyle = {
@@ -159,10 +154,7 @@ export default class PointsChart extends PureComponent {
       justifyContent: "center",
       alignItems: "center"
     };
-    const root = {
-      display: "flex",
-      flexDirection: "row"
-    };
+
     return (
       <div>
         <Button
@@ -176,7 +168,7 @@ export default class PointsChart extends PureComponent {
           Export
         </Button>
         <div style={containerStyle}>
-          {this.state.data > 0 ? (
+          {this.state.data.length > 0 ? (
             <>
               <div style={chartWrapperStyle}>
                 <BarChart
@@ -205,12 +197,11 @@ export default class PointsChart extends PureComponent {
               </div>
 
               <div style={statsStyle}>
-                <SplitButton
-                  onSelect={this.handleSelectionChanged}
+                <Chip
+                label={this.state.selectedVendor.vendorName}
                   style={chipStyle}
                   options={this.state.data}
                 />
-                {/* <MembershipTag type="blue" label="Blue Membership" /> */}
                 <div style={statCardContainer}>
                   <StatCard
                     tag="Total Cash"

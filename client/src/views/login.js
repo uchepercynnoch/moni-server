@@ -45,7 +45,7 @@ export default class Login extends Component {
         this.setState({ loggingIn: true });
         console.log("In here!");
         createAxiosInstance()
-            .post("/admin/login", { email, password })
+            .post("/api/admin/login", { email, password })
             .then(res => {
                 console.log(res.data);
                 const { token } = res.data;

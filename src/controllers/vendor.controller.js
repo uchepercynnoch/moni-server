@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const Vendor = require("../models/vendor.model");
 const shortid = require("shortid");
-const { uploadDestination } = require("../helpers/helper");
+const { uploadDestination, parseObjectId } = require("../helpers/helper");
 
 //TODO: Add image uploading with multer
 
@@ -29,15 +29,15 @@ router.post("/add", async (req, res) => {
 router.get("/", async (req, res) => {
     let query = null;
     if (req.query.id)
-        query = Vendor.findOne({ id: req.query.id });
+        query = Vendor.findOne({ _id: parseObjectId(req.query.id) });
     else 
         query = Vendor.find();
         
     query
-        .lean()
         .then(result => {
-           if (!result) throw "There are no vendors";
-                return res.json(result);
+            console.log(result);
+            if (!result) throw "There are no vendors";
+            return res.json(result);
             })
             .catch(error => res.status(500).send({ error: "An error while pulling out db data" }));
 });

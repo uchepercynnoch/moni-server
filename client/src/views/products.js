@@ -73,7 +73,7 @@ export default function Product() {
 
     useEffect(() => {
         createAxiosInstance()
-            .get(`/product/all?id=${getUserData().vendor}`)
+            .get(`/api/product/all?id=${getUserData().vendor}`)
             .then(res => {
                 const products = [];
                 res.data.forEach(data => {
@@ -93,7 +93,7 @@ export default function Product() {
         setError(false);
         data.vendor = getUserData().vendor;
         createAxiosInstance()
-            .post("/product/register", data)
+            .post("/api/product/register", data)
             .then(res => {
                 setSaving(false);
                 setSaved(true);
@@ -112,7 +112,7 @@ export default function Product() {
 
     const getProduct = id => {
         createAxiosInstance()
-            .get(`/product?id=${id}`)
+            .get(`/api/product?id=${id}`)
             .then(res => {
                 console.log(res.data);
                 setProduct(createData(res.data));
@@ -140,7 +140,7 @@ export default function Product() {
         setSaved(false);
         setError(false);
         createAxiosInstance()
-            .post(`/product/update`, product)
+            .post(`/api/product/update`, product)
             .then(res => {
                 setSaving(false);
                 setSaved(true);

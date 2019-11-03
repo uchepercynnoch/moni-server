@@ -189,6 +189,8 @@ export default function Dashboard(props) {
                             </ListItemIcon>
                             <ListItemText primary="Vendor" />
                         </ListItem>
+                    </div>
+                ) : null}
                         <ListItem
                             style={value === 9 ? { backgroundColor: "#505569" } : {}}
                             button
@@ -199,8 +201,6 @@ export default function Dashboard(props) {
                             </ListItemIcon>
                             <ListItemText primary="Admin" />
                         </ListItem>
-                    </div>
-                ) : null}
             </div>
         );
     };

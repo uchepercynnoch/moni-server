@@ -1,5 +1,6 @@
 const authJwt = require('express-jwt')
-const UserAccount = require('../models/useraccount.model')
+const UserAccount = require('../models/useraccount.model');
+const mongoose = require("mongoose");
 
 const parseObjectId = value => mongoose.Types.ObjectId.createFromHexString(value)
 

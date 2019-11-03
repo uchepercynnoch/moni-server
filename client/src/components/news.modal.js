@@ -28,7 +28,6 @@ import IconButton from "@material-ui/core/IconButton";
 import SnackbarContent from "@material-ui/core/SnackbarContent";
 import WarningIcon from "@material-ui/icons/Warning";
 import { makeStyles } from "@material-ui/core/styles";
-import { baseURL } from "../util";
 
 const variantIcon = {
     success: CheckCircleIcon,
@@ -139,7 +138,7 @@ export default function OfferModal(props) {
                         />
                     </div>
                     <div style={{ margin: "10px" }}>
-                        <img alt="No Image!" src={`${baseURL}${props.news.imageId}`} width="50" height="50" />
+                        <img alt="No Image!" src={props.news.imageId} width="50" height="50" />
                     </div>
 
                     <Snackbar

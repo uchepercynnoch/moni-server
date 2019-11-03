@@ -12,6 +12,7 @@ const shortid = require('shortid')
 const { parseObjectId } = require('../helpers/helper')
 const { fetchTransactionFromDB } = require('../helpers/db-helper')
 const { toDinero, stripPrecision } = require('../helpers/dinero-helper')
+const mongoose = require("mongoose");
 
 const computeTransactionBreakdown = ({
     currentGems,

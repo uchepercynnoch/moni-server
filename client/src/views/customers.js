@@ -132,7 +132,7 @@ export default function Customer() {
 
   useEffect(() => {
     createAxiosInstance()
-      .get(`/user`)
+      .get(`/api/user`)
       .then(res => {
         const customers = [];
         res.data.forEach(data => {
@@ -163,7 +163,7 @@ export default function Customer() {
 
   const getCustomer = (_id) => {
     return createAxiosInstance()
-    .get(`/user?id=${_id}`)
+    .get(`/api/user?id=${_id}`)
     .then(res => {
       return res.data;
     });
@@ -171,7 +171,7 @@ export default function Customer() {
 
   const getCustomerTransactions = (_id) => {
     return createAxiosInstance()
-      .get(`/transaction?userId=${_id}`)
+      .get(`/api/transaction?userId=${_id}`)
       .then(res => {
         return res.data;
       });

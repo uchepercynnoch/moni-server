@@ -297,6 +297,7 @@ router.get("/", async (req,res) => {
     })
         .lean()
         .then(result => {
+            console.log(result);
             if (!result) return res.status(404).send({ error: "There are no users currently!" });
             return res.send(result);
         })

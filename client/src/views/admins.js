@@ -52,7 +52,7 @@ const columns = [
     title: "Phone Number",
     minWidth: 170
   },
-  { field: "vendor", title: "Vendor", minWidth: 100 },
+  { field: "$vendor", title: "Vendor", minWidth: 100 },
   { field: "type", title: "Role", minWidth: 100 },
   {
     field: "lastLogin",
@@ -77,7 +77,8 @@ function createData(obj) {
     password: obj.password,
     phoneNumber: obj.phoneNumber,
     gender: obj.gender,
-    vendor: typeof obj.vendor === "object" ? obj.vendor.vendorName : "",
+    $vendor: typeof obj.vendor === "object" ? obj.vendor.vendorName : "",
+    vendor: typeof obj.vendor === "object" ? obj.vendor._id : "",
     type: obj.type,
 
     createdAt: obj.createdAt,
@@ -142,8 +143,8 @@ export default function Admins() {
 
   const getAdmins = () => {
     const url = isSuperAdmin()
-      ? `/admin`
-      : `/admin?vendorId=${getUserData().vendor}`;
+      ? `/api/admin`
+      : `/api/admin?vendorId=${getUserData().vendor}`;
     return createAxiosInstance()
       .get(url)
       .then(res => {
@@ -161,7 +162,7 @@ export default function Admins() {
 
   const getVendors = () => {
     return createAxiosInstance()
-      .get(`/vendor`)
+      .get(`/api/vendor`)
       .then(res => {
         const vendors = [];
         res.data.forEach(data => {
@@ -182,7 +183,7 @@ export default function Admins() {
     console.log(data);
 
     createAxiosInstance()
-      .post("/admin/register", data)
+      .post("/api/admin/register", data)
       .then(res => {
         setSaving(false);
         setSaved(true);
@@ -200,12 +201,10 @@ export default function Admins() {
   };
 
   const getAdmin = id => {
-    console.log("Hey");
     createAxiosInstance()
-      .get(`/admin?id=${id}`)
+      .get(`/api/admin?id=${id}`)
       .then(res => {
         const data = createData(res.data);
-        console.log(data);
         data.password = "";
         setAdmin(data);
       })
@@ -217,7 +216,6 @@ export default function Admins() {
 
   const handleDelete = () => {};
   const handleView = id => {
-    console.log("Hello");
     setOpenView(true);
     getAdmin(id);
   };
@@ -234,7 +232,7 @@ export default function Admins() {
     setSaved(false);
     setError(false);
     createAxiosInstance()
-      .post(`/admin/update`, admin)
+      .post(`/api/admin/update`, admin)
       .then(res => {
         setSaving(false);
         setSaved(true);

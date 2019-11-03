@@ -15,7 +15,7 @@ const columns = [
 
 function createData(obj) {
     return {
-        id: obj.id,
+        id: obj._id,
         vendorName: obj.vendorName,
         location: obj.location,
         iamAlias: obj.iamAlias,
@@ -61,7 +61,7 @@ export default function Vendors() {
 
     useEffect(() => {
         createAxiosInstance()
-            .get(`/vendor`)
+            .get(`/api/vendor`)
             .then(res => {
                 const transactions = [];
                 res.data.forEach(data => {
@@ -81,7 +81,7 @@ export default function Vendors() {
         setError(false);
         data.vendor = getUserData().vendor;
         createAxiosInstance()
-            .post("/vendor/add", data)
+            .post("/api/vendor/add", data)
             .then(res => {
                 setSaving(false);
                 setSaved(true);
@@ -100,7 +100,7 @@ export default function Vendors() {
 
     const getVendor = id => {
         createAxiosInstance()
-            .get(`/vendor?id=${id}`)
+            .get(`/api/vendor?id=${id}`)
             .then(res => {
                 const obj = createData(res.data);
                 console.log(obj);
@@ -130,7 +130,7 @@ export default function Vendors() {
         setSaved(false);
         setError(false);
         createAxiosInstance()
-            .post(`/vendor/update`, vendor)
+            .post(`/api/vendor/update`, vendor)
             .then(res => {
                 setSaving(false);
                 setSaved(true);
