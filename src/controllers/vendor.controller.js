@@ -8,14 +8,14 @@ const { uploadDestination, parseObjectId } = require("../helpers/helper");
 router.post("/add", async (req, res) => {
     if (!req.body) return res.status(400).send({ error: "Invalid request parameters" });
 
-    const { vendorName, imageId, config, location, loyaltyPercentage, iamAlias } = req.body;
+    const { vendorName, imageId, email, location, loyaltyPercentage, iamAlias } = req.body;
     const newVendor = await Vendor({
         id: shortid.generate(),
         iamAlias,
         location,
         vendorName,
         imageId,
-        config,
+        email,
         loyaltyPercentage,
         transactions: []
     });

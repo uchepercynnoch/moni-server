@@ -1,12 +1,12 @@
-import React, { useEffect } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import React, {useEffect} from "react";
+import {makeStyles} from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import MaterialTable from "material-table";
-import { Button, Avatar } from "@material-ui/core";
-import { createAxiosInstance, getUserData, isSuperAdmin } from "../util";
+import {Button, Avatar} from "@material-ui/core";
+import {createAxiosInstance, getUserData, isSuperAdmin} from "../util";
 import CashierRegistrationModal from "../components/cashierRegisteraton";
 import CashierModal from "../components/cashier";
-import { red } from "@material-ui/core/colors";
+import {red} from "@material-ui/core/colors";
 
 const nameStyle = {
     display: "flex",
@@ -35,14 +35,14 @@ const columns = [
                     .split(" ")[1]
                     .substr(0, 1)
                     .toUpperCase()}`}</Avatar>
-                <p style={{ fontWeight: "bold" }}>{rowData.name}</p>
+                <p style={{fontWeight: "bold"}}>{rowData.name}</p>
             </div>
         ),
         cellStyle: {
             padding: "0px"
         }
     },
-    { field: "iam", title: "IAM", minWidth: 100 },
+    {field: "iam", title: "IAM", minWidth: 100},
     {
         field: "lastLogon",
         title: "Last Login",
@@ -64,6 +64,7 @@ function createData(obj) {
         phoneNumber: obj.phoneNumber
     };
 }
+
 function createSingleData(obj) {
     return {
         id: obj.id,
@@ -169,14 +170,15 @@ export default function Cashiers() {
             });
     };
 
-    const handleDelete = () => {};
+    const handleDelete = () => {
+    };
     const handleView = id => {
         setOpenView(true);
         getCashier(id);
     };
 
     const cashierDetailsUpdate = event => {
-        const obj = { ...cashier };
+        const obj = {...cashier};
         console.log(event.target);
         obj[event.target.id] = event.target.value;
         setCashier(obj);
@@ -223,7 +225,7 @@ export default function Cashiers() {
                 handleView(rowData.id);
             },
             iconProps: {
-                style: { ...visibilityIconFontStyle }
+                style: {...visibilityIconFontStyle}
             }
         },
         {
@@ -234,7 +236,7 @@ export default function Cashiers() {
                 handleView(rowData.id);
             },
             iconProps: {
-                style: { ...editIconFontStyle }
+                style: {...editIconFontStyle}
             }
         }
     ];
@@ -246,7 +248,7 @@ export default function Cashiers() {
             handleDelete();
         },
         iconProps: {
-            style: { ...deleteIconFontStyle }
+            style: {...deleteIconFontStyle}
         }
     };
 
@@ -259,56 +261,60 @@ export default function Cashiers() {
     };
 
     return (
-        <Paper className={classes.root}>
-            <div className={classes.tableWrapper}>
-                <div className={classes.controls}>
-                    <Button
-                        style={{ margin: "5px" }}
-                        size="small"
-                        color="primary"
-                        variant="contained"
-                        aria-label="add"
-                        className={classes.margin}
-                        onClick={() => setOpen(true)}
-                    >
-                        Add Cashier
-                    </Button>
-                    
-                </div>
-                <MaterialTable
-                    title="Cashiers"
-                    columns={columns}
-                    data={rows}
-                    actions={tableActions}
-                    localization={localizationOptions}
-                    options={{
-                        columnsButton: true,
-                        actionsColumnIndex: -1,
-                        exportButton: true
-                    }}
-                />
-                <CashierRegistrationModal
-                    closeSnack={type => (type === "success" ? setSaved(false) : setError(false))}
-                    saved={saved}
-                    error={error}
-                    saving={saving}
-                    open={open}
-                    Close={() => setOpen(false)}
-                    Save={handleSave}
-                />
-                <CashierModal
-                    closeSnack={type => (type === "success" ? setSaved(false) : setError(false))}
-                    saved={saved}
-                    error={error}
-                    saving={saving}
-                    open={openView}
-                    Close={() => setOpenView(false)}
-                    Update={cashierUpdate}
-                    cashier={cashier}
-                    updateCashier={cashierDetailsUpdate}
-                    edit={edit}
-                />
+        <div className="br-mainpanel">
+            <div className="pd-30">
+                <Paper className={classes.root}>
+                    <div className={classes.tableWrapper}>
+                        <div className={classes.controls}>
+                            <Button
+                                style={{margin: "5px"}}
+                                size="small"
+                                color="primary"
+                                variant="contained"
+                                aria-label="add"
+                                className={classes.margin}
+                                onClick={() => setOpen(true)}
+                            >
+                                Add Cashier
+                            </Button>
+
+                        </div>
+                        <MaterialTable
+                            title="Cashiers"
+                            columns={columns}
+                            data={rows}
+                            actions={tableActions}
+                            localization={localizationOptions}
+                            options={{
+                                columnsButton: true,
+                                actionsColumnIndex: -1,
+                                exportButton: true
+                            }}
+                        />
+                        <CashierRegistrationModal
+                            closeSnack={type => (type === "success" ? setSaved(false) : setError(false))}
+                            saved={saved}
+                            error={error}
+                            saving={saving}
+                            open={open}
+                            Close={() => setOpen(false)}
+                            Save={handleSave}
+                        />
+                        <CashierModal
+                            closeSnack={type => (type === "success" ? setSaved(false) : setError(false))}
+                            saved={saved}
+                            error={error}
+                            saving={saving}
+                            open={openView}
+                            Close={() => setOpenView(false)}
+                            Update={cashierUpdate}
+                            cashier={cashier}
+                            updateCashier={cashierDetailsUpdate}
+                            edit={edit}
+                        />
+                    </div>
+                </Paper>
             </div>
-        </Paper>
+        </div>
     );
 }
