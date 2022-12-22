@@ -33,7 +33,7 @@
     "fs-extra": "^8.1.0",
     "helmet": "^3.21.0",
     "joi": "^14.3.1",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "knex": "^0.19.4",
     "lodash": "^4.17.15",
     "momentjs": "^2.0.0",
